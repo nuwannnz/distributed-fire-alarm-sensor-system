@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const fireAlarmService = require('../services/fire-alarm.service');
 
+const { verifyJWTToken } = require('./middleware');
+
 /* GET users listing. */
 router.get('/', async (req, res, next) => {
     try {
@@ -25,7 +27,7 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', verifyJWTToken, async (req, res, next) => {
     const { floor, room } = req.body;
     try {
 
@@ -40,7 +42,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.patch('/:id', async (req, res, next) => {
+router.patch('/:id', verifyJWTToken, async (req, res, next) => {
     const { floor, room } = req.body;
     const id = req.params.id;
     try {
@@ -77,7 +79,7 @@ router.patch('/:id/co2', async (req, res, next) => {
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', verifyJWTToken, async (req, res, next) => {
     const id = req.params.id;
     try {
         await fireAlarmService.deleteFireAlarm(id);

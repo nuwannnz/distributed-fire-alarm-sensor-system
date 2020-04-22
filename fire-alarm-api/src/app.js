@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const logger = require('morgan');
 const fireAlarmRouter = require('./routes/fire-alarm');
@@ -15,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 app.use('/fire-alarm', fireAlarmRouter);
 
 module.exports = app;
