@@ -6,37 +6,49 @@
 package fire.alarm.desktopi.client;
 
 import firealarm.rmi.api.*;
+import java.awt.event.ActionEvent;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author nuwan
  */
 public class SensorWindow extends javax.swing.JFrame implements Runnable {
-    
+
     private FireAlarmSensorService fireAlarmService;
     private UserService userService;
-    
+
     private boolean hasAdmin = false;
-    
     private String userAuthToken = null;
+    private List<FireAlarmSensor> sensorList;
 
     /**
      * Creates new form SensorWindow
      */
     public SensorWindow(FireAlarmSensorService fireAlarmService, UserService userService) {
-        initComponents();
+
+        // draw the window 
+        initComponents(); // auto generated method by Netbeans
+
         this.fireAlarmService = fireAlarmService;
         this.userService = userService;
-        
+
+        // initialize sensor list
+        sensorList = new ArrayList<>();
+
+        // initialize button labels
         initLoginButton();
-        
+
+        // schedule fetching of sensors to run every 30 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
     }
@@ -56,6 +68,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         userInfo = new javax.swing.JLabel();
         addFireAlarmBtn = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
         sensorPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -126,10 +139,14 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
 
         jPanel1.add(buttonPanel);
 
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
         sensorPanel.setBackground(new java.awt.Color(204, 204, 255));
         sensorPanel.setToolTipText("");
         sensorPanel.setPreferredSize(new java.awt.Dimension(800, 500));
-        jPanel1.add(sensorPanel);
+        jScrollPane1.setViewportView(sensorPanel);
+
+        jPanel1.add(jScrollPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -157,11 +174,10 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         if (userAuthToken == null) {
             // user not logged in
             // display error dialog
-            new ErrorDialog(this, rootPaneCheckingEnabled, "Please login to create a fire alarm")
-                    .setVisible(true);
-            
+            showErrorDialog("Please login to create a fire alarm");
+
         } else {
-            
+            // display fire alarm dialog
             FireAlarmDialog alarmDialog = new FireAlarmDialog(this, rootPaneCheckingEnabled, null);
             alarmDialog.setVisible(true);
             addFireAlarm(alarmDialog.getFloor(), alarmDialog.getRoom());
@@ -175,54 +191,99 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loginButton;
     private javax.swing.JPanel sensorPanel;
     private javax.swing.JLabel userInfo;
     // End of variables declaration//GEN-END:variables
 
+    /**
+     * This method will fetch the fire alarms from the RMI server and add them
+     * to the sensor list
+     */
     private void fetchFireAlarms() {
         System.out.println("fetching fire alarms");
         try {
             List<FireAlarmSensor> sensors = fireAlarmService.getAllFireAlarms();
-            
-            sensorPanel.removeAll();
-            
-            for (FireAlarmSensor sensor : sensors) {
-                SensorItem item = new SensorItem();
-                item.setSensor(sensor);
-                
-                sensorPanel.add(item);
-            }
-            sensorPanel.repaint();
-            sensorPanel.revalidate();
+
+            sensorList.removeAll(sensorList);
+            sensorList.addAll(sensors);
+
+            populateSensorPanel();
+
         } catch (RemoteException ex) {
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
-    
+
+    /**
+     * This method will clear the sensor panel and will populate it with the
+     * current sensorList
+     */
+    private void populateSensorPanel() {
+        // clear sensor panel
+        sensorPanel.removeAll();
+
+        for (FireAlarmSensor sensor : sensorList) {
+            SensorItem item = new SensorItem();
+            item.setSensor(sensor);
+            
+            // set a click listener for the edit button
+            item.setOnEditClickListner(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                  int clickedAlarmId = Integer.valueOf( e.getActionCommand());
+                  SensorWindow.this.handleEditClicked(clickedAlarmId);
+                }
+            });
+            
+            // set a click listener for the delete button
+            item.setOnDeleteClickListner(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                  int clickedAlarmId = Integer.valueOf( e.getActionCommand());
+                  SensorWindow.this.handleDeleteClicked(clickedAlarmId);
+                }
+            });
+            
+            // add item to the sensor panel
+            sensorPanel.add(item);
+        }
+
+        // notify sensor panel
+        sensorPanel.repaint();
+        sensorPanel.revalidate();
+        
+        jScrollPane1.repaint();
+        jScrollPane1.revalidate();
+    }
+
+    /**
+     * This method will display the login form if the user is not logged in and
+     * will logout the user otherwise
+     */
     private void handleLoginClicked() {
         if (userAuthToken == null) {
             // not logged in
             // show login dialog          
             LoginDialog d;
             if (hasAdmin) {
-                d = new LoginDialog(this, rootPaneCheckingEnabled, false);                
+                // login mode
+                d = new LoginDialog(this, rootPaneCheckingEnabled, false);
             } else {
                 // sign up mode
                 d = new LoginDialog(this, rootPaneCheckingEnabled, true);
             }
-            
             d.setVisible(true);
-            // after the dialog is closed
+
+            // check if user submitted the form or clicked cancel
             if (d.getLoginClicked()) {
                 if (hasAdmin) {
                     login(d.getEmail(), d.getPassword());
-                    
                 } else {
                     signUp(d.getEmail(), d.getPassword());
                 }
-                d.clearInputs();
             }
         } else {
             // logged in
@@ -232,73 +293,229 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
             userInfo.setText("Not logged in");
         }
     }
+
+    private void handleEditClicked(int alarmId){
+     if(userAuthToken == null){
+         // not logged in
+         showErrorDialog("Please log in to edit an alarm");
+         return;
+     }   
+     
+     FireAlarmSensor sensorToUpdate = getFireAlarmById(alarmId);
+     FireAlarmDialog d = new FireAlarmDialog(this, rootPaneCheckingEnabled, sensorToUpdate);
+     d.setVisible(true);
+     sensorToUpdate.setFloor(d.getFloor());
+     sensorToUpdate.setRoom(d.getRoom());
+     
+        updateFireAlarm(sensorToUpdate);
+    }
     
-    private void login(String email, String password) {
-        try {
-            userAuthToken = userService.login(email, password);
-            
-        } catch (RemoteException ex) {
-            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    private void handleDeleteClicked(int alarmId){
+        if(userAuthToken == null){
+         // not logged in
+         showErrorDialog("Please log in to delete an alarm");
+         return;
+     }   
+     
+     FireAlarmSensor sensorToDelete = getFireAlarmById(alarmId);
+     
+        int deleteConfirmResult = JOptionPane.showConfirmDialog(
+                this, 
+                "Delete this fire alarm of " 
+                        + sensorToDelete.getFloor() + 
+                        " floor " 
+                        + sensorToDelete.getRoom() + " room?");
         
-        if (userAuthToken != null) {
-            loginButton.setText("Logout");
-            userInfo.setText("User: " + email);
-        } else {
-            // display error dialog
-            new ErrorDialog(this, rootPaneCheckingEnabled, "Failed to login. Please try again")
-                    .setVisible(true);
-            
+        if(deleteConfirmResult == JOptionPane.YES_OPTION){
+            deleteFireAlarm(sensorToDelete);
         }
     }
     
+    /**
+     * This method will call the necessary RMI server methods to perform the
+     * login
+     *
+     * @param email Email entered by the user
+     * @param password Password entered by the user
+     */
+    private void login(String email, String password) {
+        try {
+            userAuthToken = userService.login(email, password);
+            if (userAuthToken != null) {
+                // login success
+                loginButton.setText("Logout");
+                userInfo.setText("User: " + email);
+            } else {
+                // login failed
+                // display error dialog
+                showErrorDialog("Failed to login. Please try again");
+
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    /**
+     * This method will call the necessary RMI server methods to perform the
+     * sign up
+     *
+     * @param email Email entered by the user
+     * @param password Password entered by the user
+     */
     private void signUp(String email, String password) {
         try {
             boolean userCreated = userService.createAdmin(email, password);
             if (userCreated) {
+                // sign up success
                 hasAdmin = true;
                 loginButton.setText("Login");
                 handleLoginClicked();
             } else {
+                // sign up failed
                 // display error dialog
-                new ErrorDialog(this, rootPaneCheckingEnabled, "Failed to sign up. Please try again")
-                        .setVisible(true);
+                showErrorDialog("Failed to sign up. Please try again");
+
             }
         } catch (RemoteException ex) {
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
+    /**
+     * This method will call the necessary RMI server methods to 
+     * add a fire alarm
+     * @param floor Floor entered by the user
+     * @param room Room entered by the user
+     */
     private void addFireAlarm(String floor, String room) {
         try {
             FireAlarmSensor createdSensor = fireAlarmService.createFireAlarm(userAuthToken, floor, room);
             if (createdSensor != null) {
-                fetchFireAlarms();
-            } else {
-                // display error dialog
-                new ErrorDialog(this, rootPaneCheckingEnabled, "Failed to create fire alarm. Please try again")
-                        .setVisible(true);
+                // fire alarm creation succeded
+                // add fire alarm to the list
+                sensorList.add(createdSensor);
+                // update sensor panel
+                populateSensorPanel();
                 
+            } else {
+                // fire alarm creation failed
+                // display error dialog
+                showErrorDialog("Failed to create fire alarm. Please try again");
+
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * This method will call the necessary RMI server methods to 
+     * update a fire alarm
+     * @param sensorToUpdate FireAlarm clicked by the user
+     */
+    private void updateFireAlarm(FireAlarmSensor sensorToUpdate) {
+             
+        try {
+            FireAlarmSensor updatedSensor = fireAlarmService.updateFireAlarm(
+                    userAuthToken,
+                    sensorToUpdate.getId(),
+                    sensorToUpdate.getFloor(),
+                    sensorToUpdate.getRoom());
+
+            if (updatedSensor == null) {
+                // fire alarm update failed
+                showErrorDialog("Failed to update fire alarm. Please try again");
+            } else {
+                // fire alarm update succeeded
+                int indexOfOldSensor = sensorList.indexOf(sensorToUpdate);
+                if(indexOfOldSensor == -1){
+                    // sensor list has already updated
+                    return;
+                }
+                // replace the old fire alarm sensor with the new one
+                sensorList.set(indexOfOldSensor, updatedSensor);
+             
+                // update the sensor panel
+                populateSensorPanel();
             }
         } catch (RemoteException ex) {
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    /**
+     * This method will call the necessary RMI server methods to 
+     * delete a fire alarm
+     * @param alarmToDelete Fire alarm clicked by the user
+     */
+    private void deleteFireAlarm(FireAlarmSensor alarmToDelete){
+                
+        try {
+            boolean deleted = fireAlarmService.deleteFireAlarm(userAuthToken, alarmToDelete.getId());
+            if(deleted){
+                // deletion sucessful 
+                // update sensorList
+                int indexOfDeletedAlarm = sensorList.indexOf(alarmToDelete);
+                if(indexOfDeletedAlarm == -1){
+                    // fire alarm already removed from the list
+                }
+                // remove sensor from the sensorList
+                sensorList.remove(indexOfDeletedAlarm);
+                
+                // update sensor panel
+                populateSensorPanel();
+                
+            }else{
+                // failed to delete
+                showErrorDialog("Failed to delete the fire alarm. Please try again later");
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * This method will update the label of the login 
+     * button based on whether there is a registered administrator account
+     */
     private void initLoginButton() {
         try {
             hasAdmin = userService.hasAdmin();
             if (!hasAdmin) {
                 loginButton.setText("Sign up");
-            } 
+            }
         } catch (RemoteException ex) {
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    /**
+     * This method will display a dialog with the given message 
+     * and a OK button
+     * @param msg Message to display in the dialog
+     */
+    private void showErrorDialog(String msg) {
+        new ErrorDialog(this, rootPaneCheckingEnabled, msg)
+                .setVisible(true);
+    }
     
+    private FireAlarmSensor getFireAlarmById(int id){
+        FireAlarmSensor sensor = null;
+        for (FireAlarmSensor fireAlarmSensor : sensorList) {
+            if(fireAlarmSensor.getId() == id){
+                sensor = fireAlarmSensor;
+                break;
+            }
+        }
+        return sensor;
+    }
+
+    // implemented method of the Runnable interface
     @Override
     public void run() {
         fetchFireAlarms();
     }
-    
+
 }

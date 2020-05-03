@@ -13,6 +13,10 @@ exports.init = (sequelize) => {
             primaryKey: true,
             autoIncrement: true
         },
+        isActive: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
         floor: {
             type: Sequelize.STRING,
         },

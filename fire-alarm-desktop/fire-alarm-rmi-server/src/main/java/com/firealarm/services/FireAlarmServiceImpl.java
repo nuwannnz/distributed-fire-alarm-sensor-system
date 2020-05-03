@@ -104,7 +104,6 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
     @Override
     public FireAlarmSensor updateFireAlarm(String token, int alarmId, String floor, String room) throws RemoteException {
         JsonObject updateFireAlarmParams = Json.createObjectBuilder()
-                .add("id", alarmId)
                 .add("floor", floor)
                 .add("room", room)
                 .build();
@@ -112,7 +111,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         StringBuffer res = null;
 
         try {
-            res = APIHelper.patch(FIRE_ALARM_URL, updateFireAlarmParams, token);
+            res = APIHelper.patch(FIRE_ALARM_URL + "/" + alarmId, updateFireAlarmParams, token);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,7 +136,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         StringBuffer res = null;
 
         try {
-            res = APIHelper.delete(FIRE_ALARM_URL, deleteFireAlarmParams, token);
+            res = APIHelper.delete(FIRE_ALARM_URL + '/' + alarmId, deleteFireAlarmParams, token);
         } catch (IOException e) {
             e.printStackTrace();
         }

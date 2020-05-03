@@ -20,10 +20,10 @@ router.post('/signup', async (req, res, next) => {
   try {
     const user = await userService.signup(email, password);
     if (user) {
-      res.json({ status: true });
-      return;
+      return res.json({ status: true });
+
     }
-    res.json({ status: false });
+    return res.json({ status: false });
   } catch (error) {
     console.error(error);
     res.json({ error: 'Failed to signup user' });
@@ -37,10 +37,10 @@ router.post('/login', async (req, res, next) => {
     const loginCorrect = await userService.login(email, password);
     if (loginCorrect) {
       const token = userService.generateToken(email);
-      res.json({ isAuth: true, token });
-      return;
+      return res.json({ isAuth: true, token });
+
     }
-    res.json({ isAuth: false });
+    return res.json({ isAuth: false });
   } catch (error) {
     console.error(error);
     res.json({ error: 'Failed to get has admin' });

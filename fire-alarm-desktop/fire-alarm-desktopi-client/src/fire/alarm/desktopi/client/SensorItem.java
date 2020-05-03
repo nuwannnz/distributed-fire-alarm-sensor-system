@@ -6,6 +6,7 @@
 package fire.alarm.desktopi.client;
 
 import firealarm.rmi.api.FireAlarmSensor;
+import javax.swing.AbstractAction;
 
 /**
  *
@@ -21,9 +22,23 @@ public class SensorItem extends javax.swing.JPanel {
     }
 
     public void setSensor(FireAlarmSensor sensor){
-        sensorLocation.setText(sensor.getFloor() + " " + sensor.getRoom());
+        sensorLocation.setText(sensor.getFloor() + " floor " + sensor.getRoom());
         co2Level.setValue(sensor.getCo2Level() * 10);
+        co2Level.setString("CO2 : " + sensor.getCo2Level());
         smokeLevel.setValue(sensor.getSmokeLevel() * 10);
+        smokeLevel.setString("Smoke : " + sensor.getSmokeLevel());
+        
+        editBtn.setActionCommand(String.valueOf(sensor.getId()));
+        deleteBtn.setActionCommand(String.valueOf(sensor.getId()));
+    }
+    
+    public void setOnEditClickListner(AbstractAction action){
+        
+        editBtn.addActionListener(action);
+    }
+    
+    public void setOnDeleteClickListner(AbstractAction action){
+        deleteBtn.addActionListener(action);
     }
     
     /**
@@ -37,15 +52,24 @@ public class SensorItem extends javax.swing.JPanel {
 
         jLabel1 = new javax.swing.JLabel();
         sensorLocation = new javax.swing.JLabel();
-        smokeLevel = new javax.swing.JProgressBar();
+        jSeparator1 = new javax.swing.JSeparator();
         co2Level = new javax.swing.JProgressBar();
+        jSeparator2 = new javax.swing.JSeparator();
+        smokeLevel = new javax.swing.JProgressBar();
+        jSeparator3 = new javax.swing.JSeparator();
+        jPanel1 = new javax.swing.JPanel();
+        jSeparator4 = new javax.swing.JSeparator();
+        editBtn = new javax.swing.JButton();
+        deleteBtn = new javax.swing.JButton();
+        jSeparator5 = new javax.swing.JSeparator();
 
-        setAlignmentX(0.5F);
-        setPreferredSize(new java.awt.Dimension(150, 200));
+        setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        setMinimumSize(new java.awt.Dimension(132, 230));
+        setPreferredSize(new java.awt.Dimension(150, 230));
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/Emergency bell.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/alarm_warning.png"))); // NOI18N
         jLabel1.setAlignmentX(0.5F);
         jLabel1.setPreferredSize(new java.awt.Dimension(50, 50));
         jLabel1.setVerifyInputWhenFocusTarget(false);
@@ -55,14 +79,88 @@ public class SensorItem extends javax.swing.JPanel {
         sensorLocation.setText("jLabel1");
         sensorLocation.setAlignmentX(0.5F);
         add(sensorLocation);
-        add(smokeLevel);
+
+        jSeparator1.setBackground(new java.awt.Color(240, 240, 240));
+        jSeparator1.setForeground(new java.awt.Color(240, 240, 240));
+        jSeparator1.setMaximumSize(new java.awt.Dimension(200, 10));
+        jSeparator1.setPreferredSize(new java.awt.Dimension(10, 5));
+        add(jSeparator1);
+
+        co2Level.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
+        co2Level.setMaximumSize(new java.awt.Dimension(136, 19));
+        co2Level.setPreferredSize(new java.awt.Dimension(136, 19));
+        co2Level.setString("CO2 : 0");
+        co2Level.setStringPainted(true);
         add(co2Level);
+
+        jSeparator2.setBackground(new java.awt.Color(240, 240, 240));
+        jSeparator2.setForeground(new java.awt.Color(240, 240, 240));
+        jSeparator2.setMaximumSize(new java.awt.Dimension(200, 5));
+        jSeparator2.setPreferredSize(new java.awt.Dimension(10, 5));
+        add(jSeparator2);
+
+        smokeLevel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
+        smokeLevel.setMaximumSize(new java.awt.Dimension(136, 19));
+        smokeLevel.setPreferredSize(new java.awt.Dimension(136, 19));
+        smokeLevel.setString("Smoke: 0");
+        smokeLevel.setStringPainted(true);
+        add(smokeLevel);
+
+        jSeparator3.setBackground(new java.awt.Color(240, 240, 240));
+        jSeparator3.setForeground(new java.awt.Color(240, 240, 240));
+        jSeparator3.setMaximumSize(new java.awt.Dimension(200, 5));
+        jSeparator3.setPreferredSize(new java.awt.Dimension(10, 5));
+        add(jSeparator3);
+
+        jPanel1.setMaximumSize(new java.awt.Dimension(200, 30));
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.X_AXIS));
+
+        jSeparator4.setBackground(new java.awt.Color(240, 240, 240));
+        jSeparator4.setForeground(new java.awt.Color(240, 240, 240));
+        jSeparator4.setMaximumSize(new java.awt.Dimension(200, 5));
+        jSeparator4.setPreferredSize(new java.awt.Dimension(10, 5));
+        jPanel1.add(jSeparator4);
+
+        editBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/edit (1).png"))); // NOI18N
+        editBtn.setAlignmentX(0.5F);
+        editBtn.setPreferredSize(new java.awt.Dimension(100, 20));
+        jPanel1.add(editBtn);
+
+        deleteBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/delete (1).png"))); // NOI18N
+        deleteBtn.setAlignmentX(0.5F);
+        deleteBtn.setPreferredSize(new java.awt.Dimension(100, 23));
+        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(deleteBtn);
+
+        jSeparator5.setBackground(new java.awt.Color(240, 240, 240));
+        jSeparator5.setForeground(new java.awt.Color(240, 240, 240));
+        jSeparator5.setMaximumSize(new java.awt.Dimension(200, 5));
+        jSeparator5.setPreferredSize(new java.awt.Dimension(10, 5));
+        jPanel1.add(jSeparator5);
+
+        add(jPanel1);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_deleteBtnActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JProgressBar co2Level;
+    private javax.swing.JButton deleteBtn;
+    private javax.swing.JButton editBtn;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
     private javax.swing.JLabel sensorLocation;
     private javax.swing.JProgressBar smokeLevel;
     // End of variables declaration//GEN-END:variables

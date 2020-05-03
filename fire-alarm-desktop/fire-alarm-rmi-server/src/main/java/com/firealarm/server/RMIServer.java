@@ -1,5 +1,6 @@
 package com.firealarm.server;
 
+import com.firealarm.helpers.APIHelper;
 import com.firealarm.services.FireAlarmServiceImpl;
 import com.firealarm.services.UserServiceImpl;
 import firealarm.rmi.api.APIServiceNames;
@@ -23,7 +24,7 @@ public class RMIServer {
             registry.rebind(APIServiceNames.FIRE_ALARM_SERVICE.toString(),fireAlarmService);
             registry.rebind(APIServiceNames.USER_SERVICE.toString(), userService);
 
-
+//            APIHelper.allowMethods("PATCH");
 
 
             System.out.println("Services started");

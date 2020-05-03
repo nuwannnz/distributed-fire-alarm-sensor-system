@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const fireAlarmService = require('../services/fire-alarm.service');
-
 const { verifyJWTToken } = require('./middleware');
 
 /* GET users listing. */
