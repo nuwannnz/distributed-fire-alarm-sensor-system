@@ -1,1 +1,11 @@
 /bin/
+/fire-alarm-desktop/fire-alarm-desktop-client/nbproject/private/
+/fire-alarm-desktop/fire-alarm-desktop-client/build/
+/fire-alarm-desktop/fire-alarm-desktop-client/dist/
+/fire-alarm-desktop/fire-alarm-rmi-client/nbproject/private/
+/fire-alarm-desktop/fire-alarm-rmi-client/build/
+/fire-alarm-desktop/fire-alarm-rmi-api/nbproject/private/
+/fire-alarm-desktop/fire-alarm-rmi-api/build/
+/fire-alarm-desktop/fire-alarm-rmi-api/dist/
+/fire-alarm-desktop/fire-alarm-desktopi-client/nbproject/private/
+/fire-alarm-desktop/fire-alarm-desktopi-client/build/

@@ -2,6 +2,7 @@ package com.firealarm.services;
 
 import com.firealarm.helpers.APIHelper;
 import com.firealarm.helpers.JsonHelper;
+import com.firealarm.services.Constants;
 import firealarm.rmi.api.FireAlarmSensor;
 import firealarm.rmi.api.FireAlarmSensorService;
 
@@ -39,7 +40,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
     }
 
     private void fetchFireAlarmSensors(){
-        System.out.println("Fetching alarm sensors");
+//        System.out.println("Fetching alarm sensors");
         StringBuffer res = null;
         try {
             res = APIHelper.get(FIRE_ALARM_URL);

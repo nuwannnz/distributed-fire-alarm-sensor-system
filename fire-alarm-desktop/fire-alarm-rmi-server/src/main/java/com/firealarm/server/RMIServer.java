@@ -10,6 +10,7 @@ import java.rmi.registry.Registry;
 
 public class RMIServer {
     public static void main(String[] args) {
+//        System.setProperty("java.security.policy", "file:allowall.policy");
         try {
             // create the registry
             Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
@@ -21,6 +22,7 @@ public class RMIServer {
             // bind the services
             registry.rebind(APIServiceNames.FIRE_ALARM_SERVICE.toString(),fireAlarmService);
             registry.rebind(APIServiceNames.USER_SERVICE.toString(), userService);
+
 
 
 
