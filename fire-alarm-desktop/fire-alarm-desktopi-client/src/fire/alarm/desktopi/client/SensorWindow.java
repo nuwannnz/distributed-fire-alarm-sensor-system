@@ -13,14 +13,20 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 /**
  *
  * @author nuwan
  */
-public class SensorWindow extends javax.swing.JFrame implements Runnable{
-
+public class SensorWindow extends javax.swing.JFrame implements Runnable {
+    
     private FireAlarmSensorService fireAlarmService;
     private UserService userService;
+    
+    private boolean hasAdmin = false;
+    
+    private String userAuthToken = null;
+
     /**
      * Creates new form SensorWindow
      */
@@ -28,6 +34,8 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable{
         initComponents();
         this.fireAlarmService = fireAlarmService;
         this.userService = userService;
+        
+        initLoginButton();
         
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
@@ -44,7 +52,10 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable{
 
         jPanel1 = new javax.swing.JPanel();
         buttonPanel = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        loginButton = new javax.swing.JButton();
+        userInfo = new javax.swing.JLabel();
+        addFireAlarmBtn = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
         sensorPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -56,37 +67,61 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable{
 
         buttonPanel.setBackground(new java.awt.Color(153, 255, 255));
 
-        jButton1.setText("jButton1");
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+        loginButton.setText("Login");
+        loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
+                loginButtonMouseClicked(evt);
             }
         });
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        loginButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                loginButtonActionPerformed(evt);
             }
         });
+
+        userInfo.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        userInfo.setText("Not logged in");
+
+        addFireAlarmBtn.setText("Add fire alarm");
+        addFireAlarmBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addFireAlarmBtnActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel1.setText("Fire alarm sensors");
 
         javax.swing.GroupLayout buttonPanelLayout = new javax.swing.GroupLayout(buttonPanel);
         buttonPanel.setLayout(buttonPanelLayout);
         buttonPanelLayout.setHorizontalGroup(
             buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(buttonPanelLayout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(jButton1)
-                    .addGap(0, 0, Short.MAX_VALUE)))
+            .addGroup(buttonPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addGroup(buttonPanelLayout.createSequentialGroup()
+                        .addComponent(addFireAlarmBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 296, Short.MAX_VALUE)
+                        .addComponent(userInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(10, 10, 10)
+                .addComponent(loginButton)
+                .addContainerGap())
         );
         buttonPanelLayout.setVerticalGroup(
             buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(buttonPanelLayout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
+            .addGroup(buttonPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(addFireAlarmBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 17, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, buttonPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(userInfo))
+                .addGap(31, 31, 31))
         );
 
         jPanel1.add(buttonPanel);
@@ -110,26 +145,42 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable{
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+    private void loginButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_loginButtonMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1MouseClicked
+    }//GEN-LAST:event_loginButtonMouseClicked
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        LoginForm loginForm = new LoginForm();
-        loginForm.setVisible(true);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
+        handleLoginClicked();
+    }//GEN-LAST:event_loginButtonActionPerformed
 
-   
+    private void addFireAlarmBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFireAlarmBtnActionPerformed
+        if (userAuthToken == null) {
+            // user not logged in
+            // display error dialog
+            new ErrorDialog(this, rootPaneCheckingEnabled, "Please login to create a fire alarm")
+                    .setVisible(true);
+            
+        } else {
+            
+            FireAlarmDialog alarmDialog = new FireAlarmDialog(this, rootPaneCheckingEnabled, null);
+            alarmDialog.setVisible(true);
+            addFireAlarm(alarmDialog.getFloor(), alarmDialog.getRoom());
+        }
+
+    }//GEN-LAST:event_addFireAlarmBtnActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addFireAlarmBtn;
     private javax.swing.JPanel buttonPanel;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JButton loginButton;
     private javax.swing.JPanel sensorPanel;
+    private javax.swing.JLabel userInfo;
     // End of variables declaration//GEN-END:variables
 
-    
-    private void fetchFireAlarms(){
+    private void fetchFireAlarms() {
         System.out.println("fetching fire alarms");
         try {
             List<FireAlarmSensor> sensors = fireAlarmService.getAllFireAlarms();
@@ -150,8 +201,104 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable{
         
     }
     
+    private void handleLoginClicked() {
+        if (userAuthToken == null) {
+            // not logged in
+            // show login dialog          
+            LoginDialog d;
+            if (hasAdmin) {
+                d = new LoginDialog(this, rootPaneCheckingEnabled, false);                
+            } else {
+                // sign up mode
+                d = new LoginDialog(this, rootPaneCheckingEnabled, true);
+            }
+            
+            d.setVisible(true);
+            // after the dialog is closed
+            if (d.getLoginClicked()) {
+                if (hasAdmin) {
+                    login(d.getEmail(), d.getPassword());
+                    
+                } else {
+                    signUp(d.getEmail(), d.getPassword());
+                }
+                d.clearInputs();
+            }
+        } else {
+            // logged in
+            // so log out user
+            userAuthToken = null;
+            loginButton.setText("Login");
+            userInfo.setText("Not logged in");
+        }
+    }
+    
+    private void login(String email, String password) {
+        try {
+            userAuthToken = userService.login(email, password);
+            
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        if (userAuthToken != null) {
+            loginButton.setText("Logout");
+            userInfo.setText("User: " + email);
+        } else {
+            // display error dialog
+            new ErrorDialog(this, rootPaneCheckingEnabled, "Failed to login. Please try again")
+                    .setVisible(true);
+            
+        }
+    }
+    
+    private void signUp(String email, String password) {
+        try {
+            boolean userCreated = userService.createAdmin(email, password);
+            if (userCreated) {
+                hasAdmin = true;
+                loginButton.setText("Login");
+                handleLoginClicked();
+            } else {
+                // display error dialog
+                new ErrorDialog(this, rootPaneCheckingEnabled, "Failed to sign up. Please try again")
+                        .setVisible(true);
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void addFireAlarm(String floor, String room) {
+        try {
+            FireAlarmSensor createdSensor = fireAlarmService.createFireAlarm(userAuthToken, floor, room);
+            if (createdSensor != null) {
+                fetchFireAlarms();
+            } else {
+                // display error dialog
+                new ErrorDialog(this, rootPaneCheckingEnabled, "Failed to create fire alarm. Please try again")
+                        .setVisible(true);
+                
+            }
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void initLoginButton() {
+        try {
+            hasAdmin = userService.hasAdmin();
+            if (!hasAdmin) {
+                loginButton.setText("Sign up");
+            } 
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     @Override
     public void run() {
         fetchFireAlarms();
     }
+    
 }
