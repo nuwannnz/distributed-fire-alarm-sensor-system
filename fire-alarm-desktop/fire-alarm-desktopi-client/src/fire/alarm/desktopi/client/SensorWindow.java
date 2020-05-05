@@ -12,7 +12,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -72,6 +77,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         userInfo = new javax.swing.JLabel();
         addFireAlarmBtn = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        lastUpdateLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         sensorPanel = new javax.swing.JPanel();
 
@@ -115,6 +121,11 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabel1.setText("Fire alarm sensors");
 
+        lastUpdateLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lastUpdateLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lastUpdateLabel.setText("asa");
+        lastUpdateLabel.setToolTipText("");
+
         javax.swing.GroupLayout buttonPanelLayout = new javax.swing.GroupLayout(buttonPanel);
         buttonPanel.setLayout(buttonPanelLayout);
         buttonPanelLayout.setHorizontalGroup(
@@ -123,35 +134,39 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
                 .addContainerGap()
                 .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1)
+                    .addComponent(addFireAlarmBtn))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 225, Short.MAX_VALUE)
+                .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(buttonPanelLayout.createSequentialGroup()
-                        .addComponent(addFireAlarmBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 343, Short.MAX_VALUE)
-                        .addComponent(userInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(10, 10, 10)
-                .addComponent(loginButton)
+                        .addComponent(userInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(loginButton))
+                    .addComponent(lastUpdateLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         buttonPanelLayout.setVerticalGroup(
             buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(buttonPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addFireAlarmBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(buttonPanelLayout.createSequentialGroup()
+                        .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(userInfo))
+                        .addGap(27, 27, 27)
+                        .addComponent(lastUpdateLabel))
+                    .addGroup(buttonPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(addFireAlarmBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(0, 10, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, buttonPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(userInfo))
-                .addGap(31, 31, 31))
         );
 
         jScrollPane1.setAutoscrolls(true);
 
         sensorPanel.setToolTipText("");
         sensorPanel.setAutoscrolls(true);
-        sensorPanel.setPreferredSize(new java.awt.Dimension(0, 0));
+        sensorPanel.setPreferredSize(null);
         sensorPanel.addContainerListener(new java.awt.event.ContainerAdapter() {
             public void componentAdded(java.awt.event.ContainerEvent evt) {
                 sensorPanelComponentAdded(evt);
@@ -172,7 +187,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(buttonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE))
         );
 
         pack();
@@ -226,6 +241,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lastUpdateLabel;
     private javax.swing.JButton loginButton;
     private javax.swing.JPanel sensorPanel;
     private javax.swing.JLabel userInfo;
@@ -244,7 +260,10 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
             sensorList.addAll(sensors);
 
             populateSensorPanel();
-
+            
+            // update last updated time
+            lastUpdateLabel.setText("Last updated at: " + (ZonedDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))));
+            
         } catch (RemoteException ex) {
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -467,7 +486,8 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
                 showErrorDialog("Failed to update fire alarm. Please try again");
             } else {
                 // fire alarm update succeeded
-                int indexOfOldSensor = sensorList.indexOf(sensorToUpdate);
+                FireAlarmSensor oldSensor = getFireAlarmById(sensorToUpdate.getId());
+                int indexOfOldSensor = sensorList.indexOf(oldSensor);
                 if (indexOfOldSensor == -1) {
                     // sensor list has already updated
                     return;
@@ -499,6 +519,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
                 int indexOfDeletedAlarm = sensorList.indexOf(alarmToDelete);
                 if (indexOfDeletedAlarm == -1) {
                     // fire alarm already removed from the list
+                    return;
                 }
                 // remove sensor from the sensorList
                 sensorList.remove(indexOfDeletedAlarm);

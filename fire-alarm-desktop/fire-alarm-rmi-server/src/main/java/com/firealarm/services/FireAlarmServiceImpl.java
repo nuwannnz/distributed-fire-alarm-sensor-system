@@ -33,7 +33,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
 
         // schedule fire alarm fetching to run at every 15 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(this, 0, 15, TimeUnit.SECONDS);
     }
 
     @Override
@@ -42,7 +42,6 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
     }
 
     private void fetchFireAlarmSensors(){
-        System.out.println("Fetching fire alarms");
         StringBuffer res = null;
         try {
             res = APIHelper.get(FIRE_ALARM_URL);
@@ -63,19 +62,22 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
 
         }).collect(Collectors.toList());
 
-        // send warning notification if needed
-        this.checkSensorLevels(alarms);
+        List<FireAlarmSensor> originalSensorList = new ArrayList<>();
+        originalSensorList.addAll(sensorsList);
 
         // update the sensor list
         this.sensorsList.removeAll(this.sensorsList);
         this.sensorsList.addAll(alarms);
+
+        // send warning notification if needed
+        this.checkSensorLevels(originalSensorList);
     }
 
-    private void checkSensorLevels(List<FireAlarmSensor> updatedSensorList){
+    private void checkSensorLevels(List<FireAlarmSensor> originalSensorList){
 
         for (FireAlarmSensor updatedSensor :
-                updatedSensorList) {
-            FireAlarmSensor originalSensor = getSensorById(updatedSensor.getId());
+                sensorsList) {
+            FireAlarmSensor originalSensor = getSensorById(updatedSensor.getId(), originalSensorList);
 
             if(originalSensor != null){
                 // already have a sensor with this id
@@ -150,6 +152,18 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         FireAlarmSensor sensorById = null;
         for (FireAlarmSensor sensor :
                 sensorsList) {
+            if(sensor.getId() == id){
+                sensorById = sensor;
+                break;
+            }
+        }
+        return sensorById;
+    }
+
+    private FireAlarmSensor getSensorById(int id, List<FireAlarmSensor> list){
+        FireAlarmSensor sensorById = null;
+        for (FireAlarmSensor sensor :
+                list) {
             if(sensor.getId() == id){
                 sensorById = sensor;
                 break;
@@ -246,15 +260,13 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
 
         try {
             boolean isDeleted = deleteResult.getBoolean("deleted");
+            if(isDeleted){
+                fetchFireAlarmSensors();
+            }
             return isDeleted;
         }catch (NullPointerException e){
             return false;
         }
-
-    }
-
-    @Override
-    public void sendAlarmEmail(int i) throws RemoteException {
 
     }
 
