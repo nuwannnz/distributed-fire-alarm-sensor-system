@@ -33,7 +33,7 @@ exports.init = (sequelize) => {
     }, {
         sequelize,
         modelName: 'fire-alarm-sensor',
-        timestamps: true
+        timestamps: false
     }
     )
 

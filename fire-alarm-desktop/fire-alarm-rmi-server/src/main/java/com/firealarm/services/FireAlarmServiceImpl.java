@@ -33,7 +33,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
 
         // schedule fire alarm fetching to run at every 15 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(this, 0, 15, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -42,6 +42,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
     }
 
     private void fetchFireAlarmSensors(){
+        System.out.println("Fetching fire alarms");
         StringBuffer res = null;
         try {
             res = APIHelper.get(FIRE_ALARM_URL);
@@ -62,23 +63,42 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
 
         }).collect(Collectors.toList());
 
+        // send warning notification if needed
+        this.checkSensorLevels(alarms);
+
         // update the sensor list
         this.sensorsList.removeAll(this.sensorsList);
         this.sensorsList.addAll(alarms);
     }
 
-    private void checkSensorLevels(){
-        for (FireAlarmSensor sensor :
-                sensorsList) {
-            if(sensor.getCo2Level() > 5 || sensor.getSmokeLevel() > 5){
-                // issue a warning immediately
-                notifyWarningListeners(sensor);
+    private void checkSensorLevels(List<FireAlarmSensor> updatedSensorList){
 
-                // tell the REST API to send notifications
+        for (FireAlarmSensor updatedSensor :
+                updatedSensorList) {
+            FireAlarmSensor originalSensor = getSensorById(updatedSensor.getId());
 
+            if(originalSensor != null){
+                // already have a sensor with this id
+                // if the levels haven't change, we have already notified about this
+                if(originalSensor.getCo2Level() == updatedSensor.getCo2Level()
+                && originalSensor.getSmokeLevel() == updatedSensor.getSmokeLevel()){
+                    continue;
+                }
+            }
+
+            // this is either a new sensor or an old sensor with new level(s)
+            // notify if necessary
+            if(updatedSensor.getCo2Level() > 5 || updatedSensor.getSmokeLevel() > 5){
+                // issue a warning immediately to registered clients
+                notifyWarningListeners(updatedSensor);
+
+                // tell the REST API to send notifications to users
+                notifyUsers(updatedSensor);
 
             }
         }
+
+
     }
 
     private void notifyWarningListeners(FireAlarmSensor sensor){
@@ -89,7 +109,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            notifyUsers(sensor);
+
         }
     }
 
@@ -126,13 +146,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         }
     }
 
-    @Override
-    public List<FireAlarmSensor> getAllFireAlarms() throws RemoteException {
-        return this.sensorsList;
-    }
-
-    @Override
-    public FireAlarmSensor getFireAlarm(int id) throws RemoteException {
+    private FireAlarmSensor getSensorById(int id){
         FireAlarmSensor sensorById = null;
         for (FireAlarmSensor sensor :
                 sensorsList) {
@@ -141,6 +155,17 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
                 break;
             }
         }
+        return sensorById;
+    }
+
+    @Override
+    public List<FireAlarmSensor> getAllFireAlarms() throws RemoteException {
+        return this.sensorsList;
+    }
+
+    @Override
+    public FireAlarmSensor getFireAlarm(int id) throws RemoteException {
+        FireAlarmSensor sensorById = getSensorById(id);
         return sensorById;
     }
 
@@ -165,7 +190,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         JsonObject alarmJson = JsonHelper.getJsonObjectFromString(res.toString());
 
         FireAlarmSensor sensor = JsonHelper.getFireAlamSensorFromJson(alarmJson);
-
+        this.fetchFireAlarmSensors();
         return sensor;
     }
 
@@ -195,7 +220,7 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         JsonObject alarmJson = JsonHelper.getJsonObjectFromString(res.toString());
 
         FireAlarmSensor updatedAlarm = JsonHelper.getFireAlamSensorFromJson(alarmJson);
-
+        this.fetchFireAlarmSensors();
         return updatedAlarm;
     }
 

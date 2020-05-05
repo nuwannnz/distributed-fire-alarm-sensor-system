@@ -25,6 +25,8 @@ public class LoginDialog extends javax.swing.JDialog {
         initComponents();
         this.signUpMode = signUpMode;
         initLabels();
+        
+        setLocationRelativeTo(null);
     }
     
     private void initLabels(){

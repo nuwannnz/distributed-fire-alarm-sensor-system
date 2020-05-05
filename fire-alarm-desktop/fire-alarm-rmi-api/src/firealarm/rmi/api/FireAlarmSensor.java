@@ -36,11 +36,12 @@ public class FireAlarmSensor implements Serializable {
     }
 
 
-    public FireAlarmSensor(int id, String floor, String room, int smokeLevel, int co2Level) {
+    public FireAlarmSensor(int id, String floor, String room, int smokeLevel, int co2Level, boolean isActive) {
         super();
         this.id = id;
         this.floor = floor;
         this.room = room;
+        this.isActive = isActive;
         this.smokeLevel = smokeLevel;
         this.co2Level = co2Level;
     }

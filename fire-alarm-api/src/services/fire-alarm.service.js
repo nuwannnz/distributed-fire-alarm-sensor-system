@@ -13,7 +13,8 @@ const createFireAlaram = async (floor, room) => {
 }
 
 const getAllFireAlarms = async () => {
-    const fireAlarms = await FireAlarmSensor.findAll();
+    const fireAlarms = (await FireAlarmSensor.findAll()).sort((a, b) => a.id - b.id);
+
     return fireAlarms;
 }
 
@@ -24,12 +25,9 @@ const getFireAlarm = async (id) => {
 
 const updateFireAlarm = async (id, floor, room, isActive, smokeLevel, co2Level) => {
     const fireAlarm = await FireAlarmSensor.findByPk(id);
-    fireAlarm.floor = floor;
-    fireAlarm.room = room;
-    fireAlarm.is_active = isActive;
-    fireAlarm.smoke_level = smokeLevel;
-    fireAlarm.co2_level = co2Level;
-    await fireAlarm.save();
+
+    await fireAlarm.update({ floor, room, is_active: isActive, smoke_level: smokeLevel, co2_level: co2Level });
+
     const updatedFireAlarm = fireAlarm.get({ plain: true });
     return updatedFireAlarm;
 }
@@ -64,13 +62,6 @@ const updateFireAlarmStatus = async (id, isActive, smokeLevel, co2Level) => {
     return updatedFireAlarm;
 }
 
-const updateFireAlarmCo2Level = async (id, co2Level) => {
-    const fireAlarm = await FireAlarmSensor.findByPk(id);
-    fireAlarm.co2_level = co2Level;
-    await fireAlarm.save();
-    const updatedFireAlarm = fireAlarm.get({ plain: true });
-    return updatedFireAlarm;
-}
 
 module.exports = {
     createFireAlaram,

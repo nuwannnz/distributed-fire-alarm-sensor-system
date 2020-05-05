@@ -45,13 +45,7 @@ public class JsonHelper {
         String room = ((JsonObject)alarmJson).getString("room");
         int smokeLevel =  ((JsonObject)alarmJson).getInt("smoke_level");
         int co2Level =  ((JsonObject)alarmJson).getInt("co2_level");
-
-        LocalDate startDate = null;
-        LocalDate updatedDate = null;
-
-        startDate = DateHelper.getDateFromString(((JsonObject)alarmJson).getString("createdAt"));
-        updatedDate = DateHelper.getDateFromString(((JsonObject)alarmJson).getString("updatedAt"));
-
+        boolean isActive = ((JsonObject)alarmJson).getBoolean("isActive");
 
 
         FireAlarmSensor alarm = new FireAlarmSensor(
@@ -60,8 +54,8 @@ public class JsonHelper {
                 room,
                 smokeLevel,
                 co2Level,
-                startDate,
-                updatedDate);
+                isActive
+                );
 
         return alarm;
     }

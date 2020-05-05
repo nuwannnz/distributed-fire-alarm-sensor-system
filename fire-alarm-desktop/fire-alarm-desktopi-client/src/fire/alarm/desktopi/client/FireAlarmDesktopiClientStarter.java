@@ -33,13 +33,10 @@ public class FireAlarmDesktopiClientStarter {
 
             List<FireAlarmSensor> sensorList = fireAlarmSensorService.getAllFireAlarms();
 
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    SensorWindow window = new SensorWindow(fireAlarmSensorService, userService);
-                    window.setVisible(true);
+           FireAlarmDesktopClient client = new FireAlarmDesktopClient(fireAlarmSensorService, userService);
+           client.displayWindow();
                    
-                }
-            });
+           
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {

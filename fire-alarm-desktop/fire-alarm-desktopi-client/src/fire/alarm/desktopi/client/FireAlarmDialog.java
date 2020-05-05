@@ -30,6 +30,8 @@ public class FireAlarmDialog extends javax.swing.JDialog {
             fillSensorInformation();
             updateLabels();
         }
+        
+        setLocationRelativeTo(null);
     }
     
     private void fillSensorInformation(){
@@ -39,6 +41,7 @@ public class FireAlarmDialog extends javax.swing.JDialog {
     
     private void updateLabels(){
         dialogLabel.setText("Edit fire alarm");
+        addBtn.setText("Update");
     }
     
     public String getFloor(){

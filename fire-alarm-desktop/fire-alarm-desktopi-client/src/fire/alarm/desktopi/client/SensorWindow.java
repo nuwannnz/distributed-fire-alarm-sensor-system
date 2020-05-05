@@ -20,13 +20,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author nuwan
  */
-public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAlarmSensorWarningListener, Serializable {
+public class SensorWindow extends javax.swing.JFrame implements Runnable {
 
     private FireAlarmSensorService fireAlarmService;
     private UserService userService;
@@ -46,9 +47,6 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
         this.fireAlarmService = fireAlarmService;
         this.userService = userService;
 
-        // register as a warning event listener
-//        registerFireAlarmListners();
-        
         // initialize sensor list
         sensorList = new ArrayList<>();
 
@@ -58,7 +56,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
         // schedule fetching of sensors to run every 30 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
-    }        
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -69,7 +67,6 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
         buttonPanel = new javax.swing.JPanel();
         loginButton = new javax.swing.JButton();
         userInfo = new javax.swing.JLabel();
@@ -80,12 +77,18 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(850, 550));
-        setResizable(false);
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                formComponentResized(evt);
+            }
+        });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
-        jPanel1.setMinimumSize(new java.awt.Dimension(800, 600));
-        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
-
-        buttonPanel.setBackground(new java.awt.Color(153, 255, 255));
+        buttonPanel.setBackground(new java.awt.Color(204, 204, 204));
 
         loginButton.setText("Login");
         loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -122,7 +125,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
                     .addComponent(jLabel1)
                     .addGroup(buttonPanelLayout.createSequentialGroup()
                         .addComponent(addFireAlarmBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 296, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 343, Short.MAX_VALUE)
                         .addComponent(userInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(10, 10, 10)
                 .addComponent(loginButton)
@@ -135,7 +138,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(addFireAlarmBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 17, Short.MAX_VALUE))
+                .addGap(0, 10, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, buttonPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -144,26 +147,32 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
                 .addGap(31, 31, 31))
         );
 
-        jPanel1.add(buttonPanel);
+        jScrollPane1.setAutoscrolls(true);
 
-        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        sensorPanel.setBackground(new java.awt.Color(204, 204, 255));
         sensorPanel.setToolTipText("");
-        sensorPanel.setPreferredSize(new java.awt.Dimension(800, 500));
+        sensorPanel.setAutoscrolls(true);
+        sensorPanel.setPreferredSize(new java.awt.Dimension(0, 0));
+        sensorPanel.addContainerListener(new java.awt.event.ContainerAdapter() {
+            public void componentAdded(java.awt.event.ContainerEvent evt) {
+                sensorPanelComponentAdded(evt);
+            }
+        });
+        sensorPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 10, 10));
         jScrollPane1.setViewportView(sensorPanel);
-
-        jPanel1.add(jScrollPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(buttonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(buttonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE))
         );
 
         pack();
@@ -187,45 +196,41 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
             // display fire alarm dialog
             FireAlarmDialog alarmDialog = new FireAlarmDialog(this, rootPaneCheckingEnabled, null);
             alarmDialog.setVisible(true);
-            addFireAlarm(alarmDialog.getFloor(), alarmDialog.getRoom());
+            if (alarmDialog.getFormSubmitted()) {
+                addFireAlarm(alarmDialog.getFloor(), alarmDialog.getRoom());
+            }
         }
 
     }//GEN-LAST:event_addFireAlarmBtnActionPerformed
 
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }//GEN-LAST:event_formWindowOpened
+
+    private void sensorPanelComponentAdded(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_sensorPanelComponentAdded
+        resizeSensorPanel();
+    }//GEN-LAST:event_sensorPanelComponentAdded
+
+    private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
+        resizeSensorPanel();
+    }//GEN-LAST:event_formComponentResized
+
+    private void resizeSensorPanel(){
+         Dimension d = new Dimension();
+        d.setSize(jScrollPane1.getSize().getWidth() - 20, sensorPanel.getHeight());
+        sensorPanel.setPreferredSize(d);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFireAlarmBtn;
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loginButton;
     private javax.swing.JPanel sensorPanel;
     private javax.swing.JLabel userInfo;
     // End of variables declaration//GEN-END:variables
 
-    private void registerFireAlarmListners(){
-         try {
-            fireAlarmService.registerWarningListener(this);
-        } catch (RemoteException ex) {
-            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                super.windowClosing(e); 
-                try {
-                    SensorWindow.this.fireAlarmService.removeWarningListner(SensorWindow.this);
-                } catch (RemoteException ex) {
-                    Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            
-        }
-        );
-    }
-    
     /**
      * This method will fetch the fire alarms from the RMI server and add them
      * to the sensor list
@@ -257,25 +262,25 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
         for (FireAlarmSensor sensor : sensorList) {
             SensorItem item = new SensorItem();
             item.setSensor(sensor);
-            
+
             // set a click listener for the edit button
             item.setOnEditClickListner(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                  int clickedAlarmId = Integer.valueOf( e.getActionCommand());
-                  SensorWindow.this.handleEditClicked(clickedAlarmId);
+                    int clickedAlarmId = Integer.valueOf(e.getActionCommand());
+                    SensorWindow.this.handleEditClicked(clickedAlarmId);
                 }
             });
-            
+
             // set a click listener for the delete button
             item.setOnDeleteClickListner(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                  int clickedAlarmId = Integer.valueOf( e.getActionCommand());
-                  SensorWindow.this.handleDeleteClicked(clickedAlarmId);
+                    int clickedAlarmId = Integer.valueOf(e.getActionCommand());
+                    SensorWindow.this.handleDeleteClicked(clickedAlarmId);
                 }
             });
-            
+
             // add item to the sensor panel
             sensorPanel.add(item);
         }
@@ -283,7 +288,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
         // notify sensor panel
         sensorPanel.repaint();
         sensorPanel.revalidate();
-        
+
         jScrollPane1.repaint();
         jScrollPane1.revalidate();
     }
@@ -293,26 +298,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
      * will logout the user otherwise
      */
     private void handleLoginClicked() {
-        
-         //Obtain only one instance of the SystemTray object
-        SystemTray tray = SystemTray.getSystemTray();
 
-        //If the icon is a file        
-        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("edit (1).png"));
-
-        TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
-        //Let the system resize the image if needed
-        trayIcon.setImageAutoSize(true);
-        //Set tooltip text for the tray icon
-        trayIcon.setToolTip("System tray icon demo");
-        try {
-            tray.add(trayIcon);
-        } catch (AWTException ex) {
-            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        trayIcon.displayMessage("Hello, World", "notification demo", TrayIcon.MessageType.INFO);
-        
         if (userAuthToken == null) {
             // not logged in
             // show login dialog          
@@ -323,7 +309,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
             } else {
                 // sign up mode
                 d = new LoginDialog(this, rootPaneCheckingEnabled, true);
-            }
+            }            
             d.setVisible(true);
 
             // check if user submitted the form or clicked cancel
@@ -343,43 +329,46 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
         }
     }
 
-    private void handleEditClicked(int alarmId){
-     if(userAuthToken == null){
-         // not logged in
-         showErrorDialog("Please log in to edit an alarm");
-         return;
-     }   
-     
-     FireAlarmSensor sensorToUpdate = getFireAlarmById(alarmId);
-     FireAlarmDialog d = new FireAlarmDialog(this, rootPaneCheckingEnabled, sensorToUpdate);
-     d.setVisible(true);
-     sensorToUpdate.setFloor(d.getFloor());
-     sensorToUpdate.setRoom(d.getRoom());
-     
+    private void handleEditClicked(int alarmId) {
+        if (userAuthToken == null) {
+            // not logged in
+            showErrorDialog("Please log in to edit an alarm");
+            return;
+        }
+
+        FireAlarmSensor sensorToUpdate = getFireAlarmById(alarmId);
+        FireAlarmDialog d = new FireAlarmDialog(this, rootPaneCheckingEnabled, sensorToUpdate);
+        d.setVisible(true);
+        if(!d.getFormSubmitted()){
+            return;
+        }
+        sensorToUpdate.setFloor(d.getFloor());
+        sensorToUpdate.setRoom(d.getRoom());
+
         updateFireAlarm(sensorToUpdate);
     }
-    
-    private void handleDeleteClicked(int alarmId){
-        if(userAuthToken == null){
-         // not logged in
-         showErrorDialog("Please log in to delete an alarm");
-         return;
-     }   
-     
-     FireAlarmSensor sensorToDelete = getFireAlarmById(alarmId);
-     
+
+    private void handleDeleteClicked(int alarmId) {
+        if (userAuthToken == null) {
+            // not logged in
+            showErrorDialog("Please log in to delete an alarm");
+            return;
+        }
+
+        FireAlarmSensor sensorToDelete = getFireAlarmById(alarmId);
+
         int deleteConfirmResult = JOptionPane.showConfirmDialog(
-                this, 
-                "Delete this fire alarm of " 
-                        + sensorToDelete.getFloor() + 
-                        " floor " 
-                        + sensorToDelete.getRoom() + " room?");
-        
-        if(deleteConfirmResult == JOptionPane.YES_OPTION){
+                this,
+                "Delete this fire alarm of "
+                + sensorToDelete.getFloor()
+                + " floor "
+                + sensorToDelete.getRoom() + " room?");
+
+        if (deleteConfirmResult == JOptionPane.YES_OPTION) {
             deleteFireAlarm(sensorToDelete);
         }
     }
-    
+
     /**
      * This method will call the necessary RMI server methods to perform the
      * login
@@ -433,8 +422,9 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
     }
 
     /**
-     * This method will call the necessary RMI server methods to 
-     * add a fire alarm
+     * This method will call the necessary RMI server methods to add a fire
+     * alarm
+     *
      * @param floor Floor entered by the user
      * @param room Room entered by the user
      */
@@ -447,7 +437,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
                 sensorList.add(createdSensor);
                 // update sensor panel
                 populateSensorPanel();
-                
+
             } else {
                 // fire alarm creation failed
                 // display error dialog
@@ -460,12 +450,13 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
     }
 
     /**
-     * This method will call the necessary RMI server methods to 
-     * update a fire alarm
+     * This method will call the necessary RMI server methods to update a fire
+     * alarm
+     *
      * @param sensorToUpdate FireAlarm clicked by the user
      */
     private void updateFireAlarm(FireAlarmSensor sensorToUpdate) {
-             
+
         try {
             FireAlarmSensor updatedSensor = fireAlarmService.updateFireAlarm(
                     userAuthToken,
@@ -477,13 +468,13 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
             } else {
                 // fire alarm update succeeded
                 int indexOfOldSensor = sensorList.indexOf(sensorToUpdate);
-                if(indexOfOldSensor == -1){
+                if (indexOfOldSensor == -1) {
                     // sensor list has already updated
                     return;
                 }
                 // replace the old fire alarm sensor with the new one
                 sensorList.set(indexOfOldSensor, updatedSensor);
-             
+
                 // update the sensor panel
                 populateSensorPanel();
             }
@@ -491,30 +482,31 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     /**
-     * This method will call the necessary RMI server methods to 
-     * delete a fire alarm
+     * This method will call the necessary RMI server methods to delete a fire
+     * alarm
+     *
      * @param alarmToDelete Fire alarm clicked by the user
      */
-    private void deleteFireAlarm(FireAlarmSensor alarmToDelete){
-                
+    private void deleteFireAlarm(FireAlarmSensor alarmToDelete) {
+
         try {
             boolean deleted = fireAlarmService.deleteFireAlarm(userAuthToken, alarmToDelete.getId());
-            if(deleted){
+            if (deleted) {
                 // deletion sucessful 
                 // update sensorList
                 int indexOfDeletedAlarm = sensorList.indexOf(alarmToDelete);
-                if(indexOfDeletedAlarm == -1){
+                if (indexOfDeletedAlarm == -1) {
                     // fire alarm already removed from the list
                 }
                 // remove sensor from the sensorList
                 sensorList.remove(indexOfDeletedAlarm);
-                
+
                 // update sensor panel
                 populateSensorPanel();
-                
-            }else{
+
+            } else {
                 // failed to delete
                 showErrorDialog("Failed to delete the fire alarm. Please try again later");
             }
@@ -524,8 +516,8 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
     }
 
     /**
-     * This method will update the label of the login 
-     * button based on whether there is a registered administrator account
+     * This method will update the label of the login button based on whether
+     * there is a registered administrator account
      */
     private void initLoginButton() {
         try {
@@ -539,19 +531,18 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
     }
 
     /**
-     * This method will display a dialog with the given message 
-     * and a OK button
+     * This method will display a dialog with the given message and a OK button
+     *
      * @param msg Message to display in the dialog
      */
     private void showErrorDialog(String msg) {
-        new ErrorDialog(this, rootPaneCheckingEnabled, msg)
-                .setVisible(true);
+                JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
     }
-    
-    private FireAlarmSensor getFireAlarmById(int id){
+
+    private FireAlarmSensor getFireAlarmById(int id) {
         FireAlarmSensor sensor = null;
         for (FireAlarmSensor fireAlarmSensor : sensorList) {
-            if(fireAlarmSensor.getId() == id){
+            if (fireAlarmSensor.getId() == id) {
                 sensor = fireAlarmSensor;
                 break;
             }
@@ -559,17 +550,14 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAl
         return sensor;
     }
 
-    
     // implemented method of the Runnable interface
     @Override
     public void run() {
         fetchFireAlarms();
     }
 
-    @Override
-    public void notifyWarning(FireAlarmSensor fas) {
+    public void forceFetch() {
         fetchFireAlarms();
-        // display notification
     }
 
 }
