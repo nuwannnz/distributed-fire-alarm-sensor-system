@@ -2,9 +2,9 @@ package com.firealarm.services;
 
 import com.firealarm.helpers.APIHelper;
 import com.firealarm.helpers.JsonHelper;
-import com.firealarm.services.Constants;
 import firealarm.rmi.api.FireAlarmSensor;
 import firealarm.rmi.api.FireAlarmSensorService;
+import firealarm.rmi.api.FireAlarmSensorWarningListener;
 
 
 import java.io.IOException;
@@ -24,14 +24,16 @@ import javax.json.*;
 public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAlarmSensorService, Runnable {
     private final static String FIRE_ALARM_URL = Constants.FIRE_ALARM_API_URL +  "/fire-alarm";
 
-    private List<FireAlarmSensor> sensorsList;
+    private final List<FireAlarmSensor> sensorsList;
+    private final List<FireAlarmSensorWarningListener> warningListeners;
 
     public FireAlarmServiceImpl() throws RemoteException {
         this.sensorsList = new ArrayList<>();
+        this.warningListeners = new ArrayList<>();
 
-        // schedule fire alarm fetching to run at every 5 seconds
+        // schedule fire alarm fetching to run at every 15 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(this, 0, 15, TimeUnit.SECONDS);
     }
 
     @Override
@@ -40,7 +42,6 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
     }
 
     private void fetchFireAlarmSensors(){
-//        System.out.println("Fetching alarm sensors");
         StringBuffer res = null;
         try {
             res = APIHelper.get(FIRE_ALARM_URL);
@@ -51,8 +52,10 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
             return;
         }
 
+        // parse the response
         JsonArray jo =  JsonHelper.getJsonArrayFromString(res.toString());
 
+        // get fire alarm sensor objects from json
         List<FireAlarmSensor> alarms = jo.stream().map(alarmJson -> {
 
             return JsonHelper.getFireAlamSensorFromJson((JsonObject) alarmJson);
@@ -64,16 +67,81 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         this.sensorsList.addAll(alarms);
     }
 
+    private void checkSensorLevels(){
+        for (FireAlarmSensor sensor :
+                sensorsList) {
+            if(sensor.getCo2Level() > 5 || sensor.getSmokeLevel() > 5){
+                // issue a warning immediately
+                notifyWarningListeners(sensor);
+
+                // tell the REST API to send notifications
+
+
+            }
+        }
+    }
+
+    private void notifyWarningListeners(FireAlarmSensor sensor){
+        for (FireAlarmSensorWarningListener listner :
+                warningListeners) {
+            try {
+                listner.notifyWarning(sensor);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            notifyUsers(sensor);
+        }
+    }
+
+    private void notifyUsers(FireAlarmSensor sensor){
+
+        StringBuilder msgBuilder = new StringBuilder();
+
+        if(sensor.getSmokeLevel() > 5 && sensor.getCo2Level() > 5){
+            msgBuilder.append("Smoke level and the CO2 level");
+        }else if(sensor.getSmokeLevel() > 5){
+            msgBuilder.append("Smoke level");
+        }else if( sensor.getCo2Level() > 5){
+            msgBuilder.append("CO2 level");
+        }
+
+        msgBuilder.append(
+                " of the fire alarm sensor in "
+                        + sensor.getFloor()
+                        + " floor "
+                        + sensor.getRoom()
+                        + " room ");
+
+        String msg = msgBuilder.toString();
+        JsonObject sendNotificationParams = Json.createObjectBuilder()
+                .add("message", msg)
+                .build();
+        try {
+            APIHelper.post(
+                    FIRE_ALARM_URL + "/" + sensor.getId() + "/notify",
+                    sendNotificationParams,
+                    null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public List<FireAlarmSensor> getAllFireAlarms() throws RemoteException {
-
-
         return this.sensorsList;
     }
 
     @Override
-    public FireAlarmSensor getFireAlarm(int i) throws RemoteException {
-        return null;
+    public FireAlarmSensor getFireAlarm(int id) throws RemoteException {
+        FireAlarmSensor sensorById = null;
+        for (FireAlarmSensor sensor :
+                sensorsList) {
+            if(sensor.getId() == id){
+                sensorById = sensor;
+                break;
+            }
+        }
+        return sensorById;
     }
 
     @Override
@@ -101,17 +169,21 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
         return sensor;
     }
 
+
     @Override
-    public FireAlarmSensor updateFireAlarm(String token, int alarmId, String floor, String room) throws RemoteException {
+    public FireAlarmSensor updateFireAlarm(String token, FireAlarmSensor sensorTOUpdate) throws RemoteException {
         JsonObject updateFireAlarmParams = Json.createObjectBuilder()
-                .add("floor", floor)
-                .add("room", room)
+                .add("floor", sensorTOUpdate.getFloor())
+                .add("room", sensorTOUpdate.getRoom())
+                .add("is_active", sensorTOUpdate.getIsActive())
+                .add("smoke_level", sensorTOUpdate.getSmokeLevel())
+                .add("co2_level", sensorTOUpdate.getCo2Level())
                 .build();
 
         StringBuffer res = null;
 
         try {
-            res = APIHelper.patch(FIRE_ALARM_URL + "/" + alarmId, updateFireAlarmParams, token);
+            res = APIHelper.put(FIRE_ALARM_URL + "/" + sensorTOUpdate.getId(), updateFireAlarmParams, token);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,5 +231,13 @@ public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAla
     @Override
     public void sendAlarmEmail(int i) throws RemoteException {
 
+    }
+
+    public void registerWarningListener(FireAlarmSensorWarningListener listener) throws RemoteException {
+        this.warningListeners.add(listener);
+    }
+
+    public void removeWarningListner(FireAlarmSensorWarningListener listener) throws RemoteException {
+        this.warningListeners.remove(listener);
     }
 }

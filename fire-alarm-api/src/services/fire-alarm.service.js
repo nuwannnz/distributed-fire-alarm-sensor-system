@@ -22,10 +22,13 @@ const getFireAlarm = async (id) => {
     return fireAlarm;
 }
 
-const updateFireAlarm = async (id, floor, room) => {
+const updateFireAlarm = async (id, floor, room, isActive, smokeLevel, co2Level) => {
     const fireAlarm = await FireAlarmSensor.findByPk(id);
     fireAlarm.floor = floor;
     fireAlarm.room = room;
+    fireAlarm.is_active = isActive;
+    fireAlarm.smoke_level = smokeLevel;
+    fireAlarm.co2_level = co2Level;
     await fireAlarm.save();
     const updatedFireAlarm = fireAlarm.get({ plain: true });
     return updatedFireAlarm;
@@ -36,10 +39,27 @@ const deleteFireAlarm = async (id) => {
     await fireAlarm.destroy();
 }
 
-const updateFireAlarmSmokeLevel = async (id, smokeLevel) => {
+const updateFireAlarmStatus = async (id, isActive, smokeLevel, co2Level) => {
+    // find fire alarm
     const fireAlarm = await FireAlarmSensor.findByPk(id);
-    fireAlarm.smoke_level = smokeLevel;
-    await fireAlarm.save();
+    if (!fireAlarm) {
+        return null;
+    }
+
+    // update fields
+    if (isActive) {
+        await fireAlarm.update({ is_active: isActive });
+    }
+    if (smokeLevel) {
+        await fireAlarm.update({ smoke_level: smokeLevel });
+    }
+    if (co2Level) {
+        await fireAlarm.update({ co2_level: co2Level });
+
+    }
+
+    await fireAlarm.reload();
+
     const updatedFireAlarm = fireAlarm.get({ plain: true });
     return updatedFireAlarm;
 }
@@ -58,8 +78,7 @@ module.exports = {
     getFireAlarm,
     deleteFireAlarm,
     updateFireAlarm,
-    updateFireAlarmCo2Level,
-    updateFireAlarmSmokeLevel
+    updateFireAlarmStatus
 }
 
 

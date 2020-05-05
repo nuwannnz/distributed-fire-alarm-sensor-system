@@ -25,6 +25,12 @@ const login = async (email, password) => {
     return passwordMatch;
 }
 
+const getUserEmails = async () => {
+    const users = await User.findAll();
+
+    return users.map(user => user.email);
+}
+
 const generateToken = (email) => {
     const token = jwt.sign({ email }, config.jwt.secret, config.jwt.tokenOptions);
     return token;
@@ -34,5 +40,6 @@ module.exports = {
     hasAdmin,
     login,
     signup,
-    generateToken
+    generateToken,
+    getUserEmails
 }

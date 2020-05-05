@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fireAlarmService = require('../services/fire-alarm.service');
+const emailService = require('../services/email.service');
+const userService = require('../services/user.service');
 const { verifyJWTToken } = require('./middleware');
 
 /* GET users listing. */
@@ -41,11 +43,39 @@ router.post('/', verifyJWTToken, async (req, res, next) => {
     }
 });
 
-router.patch('/:id', verifyJWTToken, async (req, res, next) => {
-    const { floor, room } = req.body;
+router.post('/:id/notify', async (req, res, next) => {
+    const { message } = req.body;
     const id = req.params.id;
     try {
-        const updatedFireAlarm = await fireAlarmService.updateFireAlarm(id, floor, room);
+
+        const fireAlarm = await fireAlarmService.getFireAlarm(id);
+        const userEmails = await userService.getUserEmails();
+
+        userEmails.forEach(email => {
+
+            emailService.sendEmail(
+                email,
+                `WARNING: Status of the fire alarm in ${fireAlarm.room} room on ${fireAlarm.floor} floor`,
+                message
+            )
+        })
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error(error);
+        res.json({ error: 'Failed to notify' });
+    }
+});
+
+
+
+router.put('/:id', verifyJWTToken, async (req, res, next) => {
+    const { floor, room, is_active, smoke_level, co2_level } = req.body;
+    const id = req.params.id;
+    try {
+        // update the fire alarm
+        const updatedFireAlarm = await fireAlarmService.updateFireAlarm(id, floor, room, is_active, smoke_level, co2_level);
         res.json(updatedFireAlarm);
     } catch (error) {
         console.error(error);
@@ -53,11 +83,13 @@ router.patch('/:id', verifyJWTToken, async (req, res, next) => {
     }
 });
 
-router.patch('/:id/smoke', async (req, res, next) => {
-    const { smoke_level } = req.body;
+router.patch('/:id', async (req, res, next) => {
+    const { is_active, smoke_level, co2_level } = req.body;
     const id = req.params.id;
+
     try {
-        const updatedFireAlarm = await fireAlarmService.updateFireAlarmSmokeLevel(id, smoke_level);
+
+        const updatedFireAlarm = await fireAlarmService.updateFireAlarmStatus(id, is_active, smoke_level, co2_level);
         res.json(updatedFireAlarm);
     } catch (error) {
         console.error(error);
@@ -65,18 +97,6 @@ router.patch('/:id/smoke', async (req, res, next) => {
     }
 });
 
-
-router.patch('/:id/co2', async (req, res, next) => {
-    const { co2_level } = req.body;
-    const id = req.params.id;
-    try {
-        const updatedFireAlarm = await fireAlarmService.updateFireAlarmCo2Level(id, co2_level);
-        res.json(updatedFireAlarm);
-    } catch (error) {
-        console.error(error);
-        res.json({ error: 'Failed to update co2 level' });
-    }
-});
 
 router.delete('/:id', verifyJWTToken, async (req, res, next) => {
     const id = req.params.id;

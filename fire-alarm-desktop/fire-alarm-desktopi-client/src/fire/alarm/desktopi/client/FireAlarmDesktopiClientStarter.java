@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author nuwan
  */
-public class FireAlarmDesktopiClient {
+public class FireAlarmDesktopiClientStarter {
 
     /**
      * @param args the command line arguments
@@ -35,7 +35,9 @@ public class FireAlarmDesktopiClient {
 
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
-                    new SensorWindow(fireAlarmSensorService, userService).setVisible(true);
+                    SensorWindow window = new SensorWindow(fireAlarmSensorService, userService);
+                    window.setVisible(true);
+                   
                 }
             });
         } catch (RemoteException e) {

@@ -24,8 +24,6 @@ public class RMIServer {
             registry.rebind(APIServiceNames.FIRE_ALARM_SERVICE.toString(),fireAlarmService);
             registry.rebind(APIServiceNames.USER_SERVICE.toString(), userService);
 
-//            APIHelper.allowMethods("PATCH");
-
 
             System.out.println("Services started");
 

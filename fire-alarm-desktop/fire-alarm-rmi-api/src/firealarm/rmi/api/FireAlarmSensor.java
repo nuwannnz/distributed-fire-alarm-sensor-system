@@ -15,6 +15,7 @@ public class FireAlarmSensor implements Serializable {
     private int id;
     private String floor;
     private String room;
+    private boolean isActive;
     private int smokeLevel;
     private int co2Level;
     private LocalDate createdDate;
@@ -86,6 +87,14 @@ public class FireAlarmSensor implements Serializable {
     }
     public void setUpdatedDate(LocalDate updatedDate) {
         this.updatedDate = updatedDate;
+    }
+    
+     public boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
 }

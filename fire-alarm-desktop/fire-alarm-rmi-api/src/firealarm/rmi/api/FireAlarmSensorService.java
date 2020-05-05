@@ -17,10 +17,14 @@ public interface FireAlarmSensorService extends Remote {
 
 	FireAlarmSensor createFireAlarm(String token, String floor, String room) throws RemoteException;
 
-	FireAlarmSensor updateFireAlarm(String token, int id, String floor, String room) throws RemoteException;
+	FireAlarmSensor updateFireAlarm(String token, FireAlarmSensor sensor) throws RemoteException;
 
 	boolean deleteFireAlarm(String token, int id) throws RemoteException;
 	
 	void sendAlarmEmail(int id) throws RemoteException;
+        
+        void registerWarningListener(FireAlarmSensorWarningListener listner) throws RemoteException;
+        
+        void removeWarningListner(FireAlarmSensorWarningListener listner) throws RemoteException; 
 
 }

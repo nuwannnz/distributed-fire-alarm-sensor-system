@@ -6,7 +6,11 @@
 package fire.alarm.desktopi.client;
 
 import firealarm.rmi.api.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +26,7 @@ import javax.swing.JOptionPane;
  *
  * @author nuwan
  */
-public class SensorWindow extends javax.swing.JFrame implements Runnable {
+public class SensorWindow extends javax.swing.JFrame implements Runnable, FireAlarmSensorWarningListener, Serializable {
 
     private FireAlarmSensorService fireAlarmService;
     private UserService userService;
@@ -42,6 +46,9 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         this.fireAlarmService = fireAlarmService;
         this.userService = userService;
 
+        // register as a warning event listener
+//        registerFireAlarmListners();
+        
         // initialize sensor list
         sensorList = new ArrayList<>();
 
@@ -51,7 +58,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         // schedule fetching of sensors to run every 30 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
-    }
+    }        
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -197,6 +204,28 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel userInfo;
     // End of variables declaration//GEN-END:variables
 
+    private void registerFireAlarmListners(){
+         try {
+            fireAlarmService.registerWarningListener(this);
+        } catch (RemoteException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e); 
+                try {
+                    SensorWindow.this.fireAlarmService.removeWarningListner(SensorWindow.this);
+                } catch (RemoteException ex) {
+                    Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+        }
+        );
+    }
+    
     /**
      * This method will fetch the fire alarms from the RMI server and add them
      * to the sensor list
@@ -264,6 +293,26 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
      * will logout the user otherwise
      */
     private void handleLoginClicked() {
+        
+         //Obtain only one instance of the SystemTray object
+        SystemTray tray = SystemTray.getSystemTray();
+
+        //If the icon is a file        
+        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("edit (1).png"));
+
+        TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
+        //Let the system resize the image if needed
+        trayIcon.setImageAutoSize(true);
+        //Set tooltip text for the tray icon
+        trayIcon.setToolTip("System tray icon demo");
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException ex) {
+            Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        trayIcon.displayMessage("Hello, World", "notification demo", TrayIcon.MessageType.INFO);
+        
         if (userAuthToken == null) {
             // not logged in
             // show login dialog          
@@ -420,9 +469,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         try {
             FireAlarmSensor updatedSensor = fireAlarmService.updateFireAlarm(
                     userAuthToken,
-                    sensorToUpdate.getId(),
-                    sensorToUpdate.getFloor(),
-                    sensorToUpdate.getRoom());
+                    sensorToUpdate);
 
             if (updatedSensor == null) {
                 // fire alarm update failed
@@ -512,10 +559,17 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         return sensor;
     }
 
+    
     // implemented method of the Runnable interface
     @Override
     public void run() {
         fetchFireAlarms();
+    }
+
+    @Override
+    public void notifyWarning(FireAlarmSensor fas) {
+        fetchFireAlarms();
+        // display notification
     }
 
 }
