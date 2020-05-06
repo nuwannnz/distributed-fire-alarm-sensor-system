@@ -4,8 +4,8 @@ const config = require("../config");
 
 
 const verifyJWTToken = (req, res, next) => {
+    // extract auth header
     const authHeader = req.headers.authorization;
-
     if (!authHeader) {
         res.status(403);
         res.json({ error: 'Authentication token is missing' })
@@ -34,7 +34,6 @@ const verifyJWTToken = (req, res, next) => {
         res.status(403);
         res.json({ error: 'Authentication error. Invalid token' })
         return;
-
     }
 };
 

@@ -10,6 +10,7 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 
 /**
+ * This class represents a single FireAlarmSensor UI
  *
  * @author nuwan
  */
@@ -22,36 +23,38 @@ public class SensorItem extends javax.swing.JPanel {
         initComponents();
     }
 
-    public void setSensor(FireAlarmSensor sensor){
+    public void setSensor(FireAlarmSensor sensor) {
+
+        // set the sensor details
         sensorLocation.setText(sensor.getFloor() + " floor " + sensor.getRoom());
         co2Level.setValue(sensor.getCo2Level() * 10);
         co2Level.setString("CO2 : " + sensor.getCo2Level());
         smokeLevel.setValue(sensor.getSmokeLevel() * 10);
         smokeLevel.setString("Smoke : " + sensor.getSmokeLevel());
-        
+
         editBtn.setActionCommand(String.valueOf(sensor.getId()));
         deleteBtn.setActionCommand(String.valueOf(sensor.getId()));
-        
-        if(sensor.getIsActive()){
+
+        if (sensor.getIsActive()) {
             // set active icon
             sensorIcon.setIcon(new ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/alarm_active.png")));
         }
-        
-        if(sensor.getCo2Level() > 5 || sensor.getSmokeLevel() > 5){
+
+        if (sensor.getCo2Level() > 5 || sensor.getSmokeLevel() > 5) {
             // set warning icon
             sensorIcon.setIcon(new ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/alarm_warning.png")));
         }
     }
-    
-    public void setOnEditClickListner(AbstractAction action){
-        
+
+    public void setOnEditClickListner(AbstractAction action) {
+
         editBtn.addActionListener(action);
     }
-    
-    public void setOnDeleteClickListner(AbstractAction action){
+
+    public void setOnDeleteClickListner(AbstractAction action) {
         deleteBtn.addActionListener(action);
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -141,11 +144,6 @@ public class SensorItem extends javax.swing.JPanel {
         deleteBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fire/alarm/desktopi/client/assets/delete (1).png"))); // NOI18N
         deleteBtn.setAlignmentX(0.5F);
         deleteBtn.setPreferredSize(new java.awt.Dimension(100, 23));
-        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteBtnActionPerformed(evt);
-            }
-        });
         jPanel1.add(deleteBtn);
 
         jSeparator5.setBackground(new java.awt.Color(240, 240, 240));
@@ -156,10 +154,6 @@ public class SensorItem extends javax.swing.JPanel {
 
         add(jPanel1);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_deleteBtnActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

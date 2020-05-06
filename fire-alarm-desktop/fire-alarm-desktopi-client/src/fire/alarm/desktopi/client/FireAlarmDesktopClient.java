@@ -19,11 +19,6 @@ import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,46 +28,49 @@ import java.util.logging.Logger;
  */
 public class FireAlarmDesktopClient extends UnicastRemoteObject implements Serializable, FireAlarmSensorWarningListener {
 
-    private FireAlarmSensorService fireAlarmService;    
-    
+    private FireAlarmSensorService fireAlarmService;
+
     transient private SensorWindow mainWindow;
-    
-    public FireAlarmDesktopClient(FireAlarmSensorService fireAlarmSensorService, UserService userService) throws  RemoteException{
+
+    public FireAlarmDesktopClient(FireAlarmSensorService fireAlarmSensorService, UserService userService) throws RemoteException {
         this.fireAlarmService = fireAlarmSensorService;
-        
-        
-          try{
+
+        // change the default theme
+        try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        }catch(Exception e){
-            
+        } catch (Exception e) {
+
         }
-                
+
+        // create the main window
         mainWindow = new SensorWindow(fireAlarmSensorService, userService);
-        
+
+        // register warning listner 
         registerListeners();
-        
-      
-        
+
     }
-        
-  
-    private void registerListeners(){
+
+    /**
+     * This method will register a warning register to the RMI server
+     */
+    private void registerListeners() {
         try {
             System.out.println("Registering warning listener");
             fireAlarmService.registerWarningListener(this);
         } catch (RemoteException ex) {
             Logger.getLogger(FireAlarmDesktopClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
+        // remove the listener when the window is closing
         mainWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                super.windowClosing(e); 
+                super.windowClosing(e);
                 try {
                     FireAlarmDesktopClient.this.fireAlarmService.removeWarningListner(FireAlarmDesktopClient.this);
                     System.out.println("Removed warning listener");
@@ -80,30 +78,34 @@ public class FireAlarmDesktopClient extends UnicastRemoteObject implements Seria
                     Logger.getLogger(FireAlarmDesktopClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-             
+
         });
     }
 
-
+    // remote callback
     @Override
     public void notifyWarning(FireAlarmSensor sensor) throws RemoteException {
-           
-        
+
         mainWindow.forceFetch();
-        
+
         showNotification(sensor);
     }
-    
-    private void showNotification(FireAlarmSensor sensor){
-                   
+
+    /**
+     * This method will display a notification in the system tray
+     *
+     * @param sensor Sensor to get information from
+     */
+    private void showNotification(FireAlarmSensor sensor) {
+
         SystemTray tray = SystemTray.getSystemTray();
-       
+
         Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("/fire/alarm/desktopi/client/assets/alarm_warning.png"));
 
         TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
-       
+
         trayIcon.setImageAutoSize(true);
-       
+
         trayIcon.setToolTip("Fire alarm WARNING");
         try {
             tray.add(trayIcon);
@@ -111,15 +113,19 @@ public class FireAlarmDesktopClient extends UnicastRemoteObject implements Seria
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        String msg = "Fire alarm in " + sensor.getRoom() + " room at " + sensor.getFloor() + " floor has a warning level"; 
-        trayIcon.displayMessage("Fire alarm WARNING",   msg , TrayIcon.MessageType.WARNING);
-        
+        String msg = "Fire alarm in " + sensor.getRoom() + " room at " + sensor.getFloor() + " floor has a warning level";
+
+        // display notification
+        trayIcon.displayMessage("Fire alarm WARNING", msg, TrayIcon.MessageType.WARNING);
+
     }
-    
-    public void displayWindow(){
-        
+
+    /**
+     * This method will display the window
+     */
+    public void displayWindow() {
+
         mainWindow.setVisible(true);
     }
-    
 
 }

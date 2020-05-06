@@ -10,6 +10,7 @@ exports.init = () => {
     sequelize.authenticate()
         .then(() => {
             console.log('Database connected');
+            // create the tables if not exist
             require('./models/firealarm.model').init(sequelize);
             require('./models/user.model').init(sequelize);
 

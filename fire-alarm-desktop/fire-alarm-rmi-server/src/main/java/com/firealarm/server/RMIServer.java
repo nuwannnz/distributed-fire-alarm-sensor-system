@@ -11,7 +11,6 @@ import java.rmi.registry.Registry;
 
 public class RMIServer {
     public static void main(String[] args) {
-//        System.setProperty("java.security.policy", "file:allowall.policy");
         try {
             // create the registry
             Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);

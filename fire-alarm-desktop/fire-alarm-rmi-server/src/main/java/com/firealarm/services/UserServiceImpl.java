@@ -12,7 +12,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class UserServiceImpl extends UnicastRemoteObject implements UserService {
 
-    private final static String USER_URL = Constants.FIRE_ALARM_API_URL +  "/user";
+    private final static String USER_URL = Constants.FIRE_ALARM_API_URL +  "/users";
 
     public UserServiceImpl() throws RemoteException {
 
@@ -23,6 +23,7 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserService 
         StringBuffer res = null;
 
         try {
+            // call REST API
             res = APIHelper.get(USER_URL + "/has-admin");
         } catch (IOException e) {
             e.printStackTrace();
@@ -31,6 +32,7 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserService 
             return false;
         }
 
+        // convert response to java object
         JsonObject hasAdminResult = JsonHelper.getJsonObjectFromString(res.toString());
 
         boolean hasAdmin = hasAdminResult.getBoolean("hasAdmin");
@@ -40,7 +42,7 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserService 
 
     @Override
     public boolean createAdmin(String email, String password) throws RemoteException {
-
+        // build parameter object
         JsonObject signupParams = Json.createObjectBuilder()
                 .add("email", email)
                 .add("password", password)
@@ -58,6 +60,7 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserService 
             return false;
         }
 
+        // convert response to java object
         JsonObject signupResponse = JsonHelper.getJsonObjectFromString(res.toString());
 
         boolean isSuccess = signupResponse.getBoolean("status");
@@ -70,7 +73,7 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserService 
 
     @Override
     public String login(String email, String password) throws RemoteException {
-
+        // build parameter object
         JsonObject loginParams = Json.createObjectBuilder()
                 .add("email", email)
                 .add("password", password)

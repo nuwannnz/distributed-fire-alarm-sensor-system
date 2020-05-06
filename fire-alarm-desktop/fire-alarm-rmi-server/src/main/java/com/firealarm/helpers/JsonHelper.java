@@ -9,10 +9,14 @@ import javax.json.JsonReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.time.LocalDate;
 
 public class JsonHelper {
 
+    /**
+     * Convert a string to a JSON object
+     * @param str
+     * @return
+     */
     public static JsonObject getJsonObjectFromString(String str){
 
         JsonReader reader = Json.createReader(new StringReader(str));
@@ -22,6 +26,11 @@ public class JsonHelper {
         return parsedObject;
     }
 
+    /**
+     * Conver a string to a JSON array
+     * @param str
+     * @return
+     */
     public static JsonArray getJsonArrayFromString(String str){
 
         JsonReader reader = Json.createReader(new StringReader(str));
@@ -31,6 +40,11 @@ public class JsonHelper {
         return parsedArray;
     }
 
+    /**
+     * Convert a JSON object to a string
+     * @param obj
+     * @return
+     */
     public static String parseJsonToString(JsonObject obj){
         String parsedString;
         Writer writer = new StringWriter();
@@ -39,6 +53,11 @@ public class JsonHelper {
         return parsedString;
     }
 
+    /**
+     * Convert a JSON object to a FireAlarmSensor
+     * @param alarmJson
+     * @return
+     */
     public static FireAlarmSensor getFireAlamSensorFromJson(JsonObject alarmJson){
         int id = ((JsonObject)alarmJson).getInt("id");
         String floor = ((JsonObject)alarmJson).getString("floor");

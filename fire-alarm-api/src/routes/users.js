@@ -3,7 +3,7 @@ const router = express.Router();
 
 const userService = require('../services/user.service');
 
-/* GET users listing. */
+
 router.get('/has-admin', async (req, res, next) => {
   try {
     const hasAdmin = await userService.hasAdmin();
@@ -15,9 +15,11 @@ router.get('/has-admin', async (req, res, next) => {
 });
 
 router.post('/signup', async (req, res, next) => {
+  // extract email and password
   const { email, password } = req.body;
-  console.log('signup received', `email: ${email}, password: ${password}`);
+
   try {
+    // sign up user
     const user = await userService.signup(email, password);
     if (user) {
       return res.json({ status: true });
@@ -31,9 +33,11 @@ router.post('/signup', async (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
+  // extract email and password
   const { email, password } = req.body;
 
   try {
+    // check if credentials are valid
     const loginCorrect = await userService.login(email, password);
     if (loginCorrect) {
       const token = userService.generateToken(email);

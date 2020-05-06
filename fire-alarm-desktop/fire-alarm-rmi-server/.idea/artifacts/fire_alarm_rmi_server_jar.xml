@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="fire-alarm-rmi-server:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/fire_alarm_rmi_server_jar</output-path>
+    <root id="archive" name="fire-alarm-rmi-server.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="fire-alarm-rmi-server" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/fire-alarm-rmi-api.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../../../NetBeansProjects/JavaLibrary1/dist/JavaLibrary1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/json/javax.json-api/1.1.4/javax.json-api-1.1.4.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

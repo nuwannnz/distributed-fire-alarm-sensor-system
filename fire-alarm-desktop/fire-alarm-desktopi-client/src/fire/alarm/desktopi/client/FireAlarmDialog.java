@@ -8,6 +8,7 @@ package fire.alarm.desktopi.client;
 import firealarm.rmi.api.FireAlarmSensor;
 
 /**
+ * This class represents a FireAlarmDialog
  *
  * @author nuwan
  */
@@ -15,52 +16,53 @@ public class FireAlarmDialog extends javax.swing.JDialog {
 
     private boolean editMode = false;
     private FireAlarmSensor sensor = null;
-    private boolean formSubmitted = false; 
-    
+    private boolean formSubmitted = false;
+
     /**
      * Creates new form FireAlarmDialog
      */
-    public FireAlarmDialog(java.awt.Frame parent, boolean modal, FireAlarmSensor sensor ) {
+    public FireAlarmDialog(java.awt.Frame parent, boolean modal, FireAlarmSensor sensor) {
         super(parent, modal);
         initComponents();
-        
-        if(sensor != null){
+
+        // set the mode
+        if (sensor != null) {
             editMode = true;
             this.sensor = sensor;
             fillSensorInformation();
             updateLabels();
         }
-        
+
+        // center the dialog in the screen
         setLocationRelativeTo(null);
     }
-    
-    private void fillSensorInformation(){
+
+    private void fillSensorInformation() {
         floorTextBox.setText(sensor.getFloor());
         roomTextBox.setText(sensor.getRoom());
     }
-    
-    private void updateLabels(){
+
+    private void updateLabels() {
         dialogLabel.setText("Edit fire alarm");
         addBtn.setText("Update");
     }
-    
-    public String getFloor(){
+
+    public String getFloor() {
         return this.floorTextBox.getText();
     }
-    
-    public String getRoom(){
+
+    public String getRoom() {
         return this.roomTextBox.getText();
     }
 
-    public boolean getIsEditMode(){
+    public boolean getIsEditMode() {
         return this.editMode;
     }
-    
-    public boolean getFormSubmitted(){
+
+    public boolean getFormSubmitted() {
         return this.formSubmitted;
     }
-    
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

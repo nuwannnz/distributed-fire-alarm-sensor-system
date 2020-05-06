@@ -8,16 +8,11 @@ package fire.alarm.desktopi.client;
 import firealarm.rmi.api.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
+ * This class represents the Sensor Window
  *
  * @author nuwan
  */
@@ -60,7 +56,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
 
         // schedule fetching of sensors to run every 30 seconds
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(this, 0, 30, TimeUnit.SECONDS);
     }
 
     /**
@@ -97,11 +93,6 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         buttonPanel.setBackground(new java.awt.Color(204, 204, 204));
 
         loginButton.setText("Login");
-        loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                loginButtonMouseClicked(evt);
-            }
-        });
         loginButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 loginButtonActionPerformed(evt);
@@ -166,7 +157,6 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
 
         sensorPanel.setToolTipText("");
         sensorPanel.setAutoscrolls(true);
-        sensorPanel.setPreferredSize(null);
         sensorPanel.addContainerListener(new java.awt.event.ContainerAdapter() {
             public void componentAdded(java.awt.event.ContainerEvent evt) {
                 sensorPanelComponentAdded(evt);
@@ -192,10 +182,6 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void loginButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_loginButtonMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_loginButtonMouseClicked
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         handleLoginClicked();
@@ -230,8 +216,12 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         resizeSensorPanel();
     }//GEN-LAST:event_formComponentResized
 
-    private void resizeSensorPanel(){
-         Dimension d = new Dimension();
+    /**
+     * This method will update the dimensions of the sensor panel to match the
+     * main window
+     */
+    private void resizeSensorPanel() {
+        Dimension d = new Dimension();
         d.setSize(jScrollPane1.getSize().getWidth() - 20, sensorPanel.getHeight());
         sensorPanel.setPreferredSize(d);
     }
@@ -260,10 +250,10 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
             sensorList.addAll(sensors);
 
             populateSensorPanel();
-            
+
             // update last updated time
             lastUpdateLabel.setText("Last updated at: " + (ZonedDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))));
-            
+
         } catch (RemoteException ex) {
             Logger.getLogger(SensorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -328,7 +318,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
             } else {
                 // sign up mode
                 d = new LoginDialog(this, rootPaneCheckingEnabled, true);
-            }            
+            }
             d.setVisible(true);
 
             // check if user submitted the form or clicked cancel
@@ -358,7 +348,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
         FireAlarmSensor sensorToUpdate = getFireAlarmById(alarmId);
         FireAlarmDialog d = new FireAlarmDialog(this, rootPaneCheckingEnabled, sensorToUpdate);
         d.setVisible(true);
-        if(!d.getFormSubmitted()){
+        if (!d.getFormSubmitted()) {
             return;
         }
         sensorToUpdate.setFloor(d.getFloor());
@@ -557,7 +547,7 @@ public class SensorWindow extends javax.swing.JFrame implements Runnable {
      * @param msg Message to display in the dialog
      */
     private void showErrorDialog(String msg) {
-                JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     private FireAlarmSensor getFireAlarmById(int id) {

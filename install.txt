@@ -1,0 +1,74 @@
+************************************************************************
+                      Deployement instructions
+************************************************************************
+
+1. Database
+	** PostgreSQL server needs to be installed before proceeding
+  - Create a database in the PostgreSQL admin
+  - Note down the database username, password and the created database name
+
+
+2. REST API 
+	** NodeJS needs to be installed in order to deploy the REST API - ( https://nodejs.org/en/download/ )
+  
+  - Go to the '/fire-alarm-api' directory 
+  - Rename the 'env.example' file to '.env'
+  - Open that '.env' file in a text editor and update the DATABASE_URL's value with the username, password of the PostgreSQL server 
+    and the database name. For example if the username is 'peter', password is '1235' and the database name is 'alarm', 
+    the DATABASE_URL should look like this,
+	
+		DATABASE_URL=postgres://peter:1235@localhost:5432/alarm
+
+  - Open a terminal inside this directory
+  - Run the below commands
+	- npm install
+	- npm start
+  - Now the REST API is deployed in 'localhost' port 5000. 
+  
+  
+3. Web client
+  - From the root folder, go the the 'fire-alarm-web-client' directory.
+  - Open a terminal inside this directory 
+  - Run the below commands
+	- npm install
+	- npm start
+  - A web browser tab will be opened and it will display the web client 
+	(If a web browser did not opened, open a web browser and go to 'http://localhost:3000' to view the web client)
+	
+	
+4. RMI Server	
+  - From the root folder, go to the 'fire-alarm-desktop/dist/' directory.
+  - Open a terminal inside this directory
+  - Run the below command to run the server jar 
+	- java -jar fire-alarm-rmi-server.jar
+  - If successfully started, the terminal will print 'Services started'.
+  (** There is no need to start the java RMI registry manually. This server jar will automatically start a RMI registry)
+
+
+5. RMI desktop client
+  - From the root folder, go to the 'fire-alarm-desktop/binaries/' directory
+  - Run the 'fire-alarm-desktopi-client.jar' file either by double clicking on it 
+	or via a terminal
+	
+	
+6. Sensor Emulator 
+  - From the root folder, go to the 'fire-alarm-emulator/dist/' directory
+  - Run the 'fire-alarm-emulator.jar' file either by double clicking on it or 
+    via a terminal
+   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

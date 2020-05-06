@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
+ * This class represents a Login Dialog
  *
  * @author nuwan
  */
@@ -16,7 +17,7 @@ public class LoginDialog extends javax.swing.JDialog {
 
     private boolean loginClicked = false;
     private boolean signUpMode = false;
-    
+
     /**
      * Creates new form LoginDialog
      */
@@ -25,34 +26,35 @@ public class LoginDialog extends javax.swing.JDialog {
         initComponents();
         this.signUpMode = signUpMode;
         initLabels();
-        
+
+        // center the dialog in the screen
         setLocationRelativeTo(null);
     }
-    
-    private void initLabels(){
-        if(signUpMode){
+
+    private void initLabels() {
+        if (signUpMode) {
             dialogLabel.setText("Sign up to fire alarm service");
             loginBtn.setText("Sign up");
         }
     }
-    
-    public boolean getLoginClicked(){
+
+    public boolean getLoginClicked() {
         return this.loginClicked;
     }
-    
-    public String getEmail(){
+
+    public String getEmail() {
         return this.emailTextbox.getText();
     }
-    
-    public String getPassword(){
+
+    public String getPassword() {
         return this.passwordTextBox.getText();
     }
-    
-    public void clearInputs(){
+
+    public void clearInputs() {
         this.emailTextbox.setText("");
         this.passwordTextBox.setText("");
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -164,7 +166,6 @@ public class LoginDialog extends javax.swing.JDialog {
         this.setVisible(false);
     }//GEN-LAST:event_cancelBtnActionPerformed
 
-  
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelBtn;

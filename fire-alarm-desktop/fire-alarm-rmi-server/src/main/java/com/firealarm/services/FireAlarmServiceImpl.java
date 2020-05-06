@@ -22,7 +22,7 @@ import javax.json.*;
 
 
 public class FireAlarmServiceImpl extends UnicastRemoteObject implements FireAlarmSensorService, Runnable {
-    private final static String FIRE_ALARM_URL = Constants.FIRE_ALARM_API_URL +  "/fire-alarm";
+    private final static String FIRE_ALARM_URL = Constants.FIRE_ALARM_API_URL +  "/fire-alarms";
 
     private final List<FireAlarmSensor> sensorsList;
     private final List<FireAlarmSensorWarningListener> warningListeners;

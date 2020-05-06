@@ -10,7 +10,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.List;
 
 /**
  *
@@ -24,19 +23,19 @@ public class FireAlarmDesktopiClientStarter {
     public static void main(String[] args) {
 
         try {
+            // locate the registry
             Registry registry = LocateRegistry.getRegistry("localhost", Registry.REGISTRY_PORT);
 
+            // load the services
             FireAlarmSensorService fireAlarmSensorService = (FireAlarmSensorService) registry.lookup(APIServiceNames.FIRE_ALARM_SERVICE.toString());
             UserService userService = (UserService) registry.lookup(APIServiceNames.USER_SERVICE.toString());
 
             System.out.println("Services loaded");
 
-            List<FireAlarmSensor> sensorList = fireAlarmSensorService.getAllFireAlarms();
+            // start the client
+            FireAlarmDesktopClient client = new FireAlarmDesktopClient(fireAlarmSensorService, userService);
+            client.displayWindow();
 
-           FireAlarmDesktopClient client = new FireAlarmDesktopClient(fireAlarmSensorService, userService);
-           client.displayWindow();
-                   
-           
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
